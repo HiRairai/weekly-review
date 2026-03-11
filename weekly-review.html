@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>週次振り返りシート</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F0EAF8;
+    --bg2: #E8E0F4;
+    --surface: #FAF7FE;
+    --surface2: #EFE8F8;
+    --border: rgba(150,120,180,0.15);
+    --pink: #C97BB2;
+    --purple: #9B72CF;
+    --lavender: #B39DDB;
+    --gold: #C9956A;
+    --mint: #7BBFAA;
+    --text: #4A3728;
+    --text2: #6B4F3A;
+    --muted: #B09898;
+    --muted2: #8A7068;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  .hero {
+    background: linear-gradient(160deg, #E8DCFA 0%, #F5EFF9 60%);
+    padding: 40px 20px 28px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(180,140,220,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: 20%;
+    width: 150px; height: 150px;
+    background: radial-gradient(circle, rgba(220,170,200,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    color: var(--purple);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-weight: 700;
+    position: relative; z-index: 1;
+  }
+  .goal-text {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.9;
+    color: var(--text);
+    border-left: 3px solid var(--pink);
+    padding-left: 14px;
+    margin-bottom: 20px;
+    position: relative; z-index: 1;
+  }
+  .badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    position: relative; z-index: 1;
+  }
+  .badge {
+    font-size: 0.7rem;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1.5px solid;
+    font-weight: 700;
+  }
+  .badge-pink  { border-color: var(--pink);   color: var(--pink);   background: rgba(201,123,178,0.1); }
+  .badge-gold  { border-color: var(--gold);   color: var(--gold);   background: rgba(201,149,106,0.1); }
+  .badge-mint  { border-color: var(--mint);   color: var(--mint);   background: rgba(123,191,170,0.1); }
+
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(150,120,180,0.08);
+  }
+  .tab {
+    flex: 1;
+    padding: 14px 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    margin-bottom: -2px;
+  }
+  .tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+
+  .page { display: none; padding: 20px 16px; }
+  .page.active { display: block; }
+
+  .section-title {
+    font-size: 0.78rem;
+    color: var(--muted2);
+    letter-spacing: 0.12em;
+    margin-bottom: 10px;
+    margin-top: 22px;
+    font-weight: 700;
+  }
+  .section-title:first-child { margin-top: 0; }
+
+  .section-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    margin-top: 22px;
+  }
+  .section-row:first-child { margin-top: 0; }
+  .section-row .section-title { margin: 0; }
+
+  .card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    padding: 18px 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 12px rgba(150,120,180,0.07);
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .check-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .check-item:first-child { padding-top: 0; }
+  .check-box {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--muted);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    margin-top: 1px;
+    background: white;
+  }
+  .check-item.done .check-box { background: var(--pink); border-color: var(--pink); }
+  .check-item.done .check-box::after { content: '✓'; color: white; font-size: 0.78rem; font-weight: 700; }
+  .check-label { flex: 1; font-size: 0.88rem; line-height: 1.5; color: var(--text); transition: color 0.2s; }
+  .check-item.done .check-label { color: var(--muted); text-decoration: line-through; }
+  .check-sub { font-size: 0.72rem; color: var(--muted2); margin-top: 3px; }
+
+  .progress-wrap {
+    background: var(--bg2);
+    border-radius: 20px;
+    height: 7px;
+    margin: 14px 0 4px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, var(--pink), var(--lavender));
+    transition: width 0.4s ease;
+  }
+  .progress-label { font-size: 0.72rem; color: var(--muted2); text-align: right; }
+
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    padding: 12px 14px;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 90px;
+  }
+  textarea:focus { border-color: var(--lavender); }
+  textarea::placeholder { color: var(--muted); }
+
+  .num-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .num-row:last-child { border-bottom: none; }
+  .num-label { flex: 1; font-size: 0.88rem; color: var(--text); }
+  .num-sub { font-size: 0.72rem; color: var(--muted2); }
+  .num-ctrl { display: flex; align-items: center; gap: 8px; }
+  .num-btn {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--bg2);
+    color: var(--text2);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .num-btn:active { background: var(--pink); border-color: var(--pink); color: white; }
+  .num-val {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--purple);
+    min-width: 36px;
+    text-align: center;
+  }
+
+  .week-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .week-nav-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 6px rgba(150,120,180,0.1);
+  }
+  .week-nav-btn:active { background: var(--bg2); }
+  .week-label { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+
+  .btn-primary {
+    width: 100%;
+    padding: 16px;
+    border-radius: 50px;
+    border: none;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+    box-shadow: 0 4px 20px rgba(155,114,207,0.3);
+    transition: transform 0.15s;
+    letter-spacing: 0.05em;
+  }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .history-item {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 10px rgba(150,120,180,0.06);
+  }
+  .history-week { font-size: 0.8rem; color: var(--purple); margin-bottom: 8px; font-weight: 700; }
+  .history-score { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  .score-chip { font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; background: var(--bg2); color: var(--text2); font-weight: 700; }
+  .history-text { font-size: 0.82rem; color: var(--muted2); line-height: 1.6; }
+  .history-text strong { color: var(--text2); font-size: 0.78rem; display: block; margin-bottom: 2px; margin-top: 8px; font-weight: 700; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: 30px;
+    box-shadow: 0 4px 20px rgba(155,114,207,0.4);
+    transition: transform 0.3s ease;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.88rem; line-height: 1.8; }
+  .empty-icon { font-size: 2.4rem; display: block; margin-bottom: 12px; }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(80,50,100,0.3);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 28px 28px 0 0;
+    padding: 28px 20px 44px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+    border-top: 2px solid var(--border);
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .modal-sub { font-size: 0.75rem; color: var(--muted2); margin-bottom: 20px; }
+
+  .task-edit-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .task-edit-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 0.85rem;
+    padding: 10px 12px;
+    outline: none;
+  }
+  .task-edit-input:focus { border-color: var(--lavender); }
+  .task-edit-sub {
+    flex: 1;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted2);
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 0.78rem;
+    padding: 8px 12px;
+    outline: none;
+  }
+  .task-edit-sub:focus { border-color: var(--lavender); }
+  .task-delete-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .task-delete-btn:active { background: rgba(220,100,100,0.15); color: #C06060; }
+  .btn-add-task {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 2px dashed rgba(155,114,207,0.35);
+    background: transparent;
+    color: var(--purple);
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin: 8px 0 20px;
+  }
+  .btn-add-task:active { background: rgba(155,114,207,0.08); }
+  .modal-actions { display: flex; gap: 10px; }
+  .btn-cancel {
+    flex: 1; padding: 14px; border-radius: 50px;
+    border: 1.5px solid var(--border); background: transparent;
+    color: var(--muted2); font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  }
+  .btn-save-tasks {
+    flex: 2; padding: 14px; border-radius: 50px; border: none;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white; font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 0.9rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(155,114,207,0.3);
+  }
+  .edit-tasks-btn {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 20px; color: var(--muted2);
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 0.72rem; font-weight: 700;
+    padding: 5px 12px; cursor: pointer;
+    box-shadow: 0 1px 6px rgba(150,120,180,0.08);
+  }
+  .edit-tasks-btn:active { background: var(--bg2); color: var(--purple); }
+
+  .roadmap-item { display: flex; gap: 14px; margin-bottom: 4px; }
+  .roadmap-line { display: flex; flex-direction: column; align-items: center; }
+  .roadmap-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+  .roadmap-connector { width: 2px; flex: 1; min-height: 24px; background: var(--border); margin: 4px 0; }
+  .roadmap-content { flex: 1; padding-bottom: 20px; }
+  .roadmap-date { font-size: 0.7rem; color: var(--muted2); margin-bottom: 4px; }
+  .roadmap-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
+  .roadmap-desc { font-size: 0.78rem; color: var(--muted2); line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">🌟 My Goal 2027.3</div>
+  <div class="goal-text">
+    私は2027年3月に、投資・副業・本業の<br>
+    素敵な仕事で、自立してめろくて<br>
+    美しい私になっている
+  </div>
+  <div class="badges">
+    <span class="badge badge-pink">💰 月5万円以上の副業収入</span>
+    <span class="badge badge-gold">📈 投資スタート</span>
+    <span class="badge badge-mint">💼 本業年収アップ</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('checkin')">📝 今週</div>
+  <div class="tab" onclick="switchTab('history')">📖 記録</div>
+  <div class="tab" onclick="switchTab('roadmap')">🗺 ロードマップ</div>
+</div>
+
+<div class="page active" id="page-checkin">
+  <div class="week-nav">
+    <button class="week-nav-btn" onclick="changeWeek(-1)">‹</button>
+    <span class="week-label" id="weekLabel"></span>
+    <button class="week-nav-btn" onclick="changeWeek(1)">›</button>
+  </div>
+
+  <div class="section-row">
+    <p class="section-title" style="margin:0">今月のタスク チェック</p>
+    <button class="edit-tasks-btn" onclick="openTaskModal()">✏️ タスクを編集</button>
+  </div>
+  <div class="card">
+    <div id="checkList"></div>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 0 完了</div>
+  </div>
+
+  <p class="section-title">今週の数字</p>
+  <div class="card">
+    <div class="num-row">
+      <div class="num-label">副業稼働時間<div class="num-sub">今週何時間動けた？</div></div>
+      <div class="num-ctrl">
+        <button class="num-btn" onclick="changeNum('hours',-1)">−</button>
+        <span class="num-val" id="val-hours">0</span>
+        <button class="num-btn" onclick="changeNum('hours',1)">+</button>
+      </div>
+    </div>
+    <div class="num-row">
+      <div class="num-label">GTA動画視聴<div class="num-sub">今週何話見た？</div></div>
+      <div class="num-ctrl">
+        <button class="num-btn" onclick="changeNum('gta',-1)">−</button>
+        <span class="num-val" id="val-gta">0</span>
+        <button class="num-btn" onclick="changeNum('gta',1)">+</button>
+      </div>
+    </div>
+    <div class="num-row">
+      <div class="num-label">FP読書<div class="num-sub">今週何ページ進んだ？</div></div>
+      <div class="num-ctrl">
+        <button class="num-btn" onclick="changeNum('fp',-10)">−</button>
+        <span class="num-val" id="val-fp">0</span>
+        <button class="num-btn" onclick="changeNum('fp',10)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-title">振り返り2問</p>
+  <div class="card">
+    <div class="check-sub" style="margin-bottom:8px">✅ 今週できたこと・よかったこと</div>
+    <textarea id="txt-good" placeholder="小さなことでもOK！書いてみて🐰" rows="3"></textarea>
+    <div class="check-sub" style="margin:14px 0 8px">🌱 来週やること（1つだけ！）</div>
+    <textarea id="txt-next" placeholder="シンプルに1つだけ決めよう💭" rows="2"></textarea>
+    <div class="check-sub" style="margin:14px 0 8px">💭 今週の気分・メモ（自由記入）</div>
+    <textarea id="txt-memo" placeholder="愚痴でも気づきでもなんでも🌀" rows="2"></textarea>
+  </div>
+  <button class="btn-primary" onclick="saveWeek()">この週を保存する 🫶🏻</button>
+</div>
+
+<div class="page" id="page-history">
+  <p class="section-title">過去の振り返り記録</p>
+  <div id="historyList">
+    <div class="empty"><span class="empty-icon">📖</span>まだ記録がないよ！<br>「今週」タブから最初の振り返りを書いてみて🐰</div>
+  </div>
+</div>
+
+<div class="page" id="page-roadmap">
+  <p class="section-title">1年間の逆算ロードマップ</p>
+  <div class="roadmap-item">
+    <div class="roadmap-line"><div class="roadmap-dot" style="background:var(--pink)"></div><div class="roadmap-connector"></div></div>
+    <div class="roadmap-content">
+      <div class="roadmap-date">2026年3月（今月）</div>
+      <div class="roadmap-title" style="color:var(--pink)">🌱 スタート月</div>
+      <div class="roadmap-desc">GTAで投資勉強スタート済 / SBI口座開設中 / Xアフィリエイトコンサル / 副業カンファレンス準備</div>
+    </div>
+  </div>
+  <div class="roadmap-item">
+    <div class="roadmap-line"><div class="roadmap-dot" style="background:var(--gold)"></div><div class="roadmap-connector"></div></div>
+    <div class="roadmap-content">
+      <div class="roadmap-date">2026年4〜5月</div>
+      <div class="roadmap-title" style="color:var(--gold)">📈 投資・副業を動かす</div>
+      <div class="roadmap-desc">NISA積立スタート（少額OK）/ 副業で初収入 / FPの知識を固める</div>
+    </div>
+  </div>
+  <div class="roadmap-item">
+    <div class="roadmap-line"><div class="roadmap-dot" style="background:var(--mint)"></div><div class="roadmap-connector"></div></div>
+    <div class="roadmap-content">
+      <div class="roadmap-date">2026年6月</div>
+      <div class="roadmap-title" style="color:var(--mint)">💼 副業の方向性を確定</div>
+      <div class="roadmap-desc">アフィリエイト or スキル副業の軸を決める / 本業年収アップの検討開始</div>
+    </div>
+  </div>
+  <div class="roadmap-item">
+    <div class="roadmap-line"><div class="roadmap-dot" style="background:var(--lavender)"></div><div class="roadmap-connector"></div></div>
+    <div class="roadmap-content">
+      <div class="roadmap-date">2026年9月</div>
+      <div class="roadmap-title" style="color:var(--lavender)">🚀 副業で月1〜2万円の実績</div>
+      <div class="roadmap-desc">投資習慣が定着 / 副業収入が安定し始める / 本業の転職・年収アップを動かす</div>
+    </div>
+  </div>
+  <div class="roadmap-item">
+    <div class="roadmap-line"><div class="roadmap-dot" style="background:var(--purple)"></div><div class="roadmap-connector"></div></div>
+    <div class="roadmap-content">
+      <div class="roadmap-date">2026年12月</div>
+      <div class="roadmap-title" style="color:var(--purple)">💰 月3〜5万円の収入源が育つ</div>
+      <div class="roadmap-desc">投資・副業ともに習慣化 / 本業年収アップの成果が出始める</div>
+    </div>
+  </div>
+  <div class="roadmap-item">
+    <div class="roadmap-line"><div class="roadmap-dot" style="background:var(--pink);width:16px;height:16px;box-shadow:0 0 14px rgba(201,123,178,0.6)"></div></div>
+    <div class="roadmap-content">
+      <div class="roadmap-date">2027年3月 🎉</div>
+      <div class="roadmap-title" style="color:var(--pink);font-size:1rem">✨ GOAL</div>
+      <div class="roadmap-desc" style="color:var(--text);font-size:0.92rem;line-height:1.9;font-weight:500">
+        投資・副業・本業の素敵な仕事で、<br>自立してめろくて美しい私になっている
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="taskModal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-title">📋 今月のタスクを編集</div>
+    <div class="modal-sub">タスクを追加・削除・編集できるよ🐰</div>
+    <div id="taskEditList"></div>
+    <button class="btn-add-task" onclick="addTaskRow()">＋ タスクを追加</button>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeTaskModal()">キャンセル</button>
+      <button class="btn-save-tasks" onclick="saveTasksFromModal()">保存する 🫶🏻</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">保存しました 🫶🏻</div>
+
+<script>
+const DEFAULT_TASKS = [
+  { label: 'Xアフィリエイトコンサルを受ける', sub: '明日予定あり！' },
+  { label: 'GTAの動画を見る', sub: '今週の目標：来週5話まで' },
+  { label: 'FPテキストを読み進める', sub: '1ヶ月以内に3〜5章' },
+  { label: '副業稼働', sub: '月50h目標（時給3,000円）' },
+  { label: 'SBI口座開設を完了させる', sub: '今月中に完了予定！' },
+];
+
+let currentWeekOffset = 0;
+const nums = { hours: 0, gta: 0, fp: 0 };
+let checks = [];
+let records = JSON.parse(localStorage.getItem('weeklyRecords') || '[]');
+let tasks = JSON.parse(localStorage.getItem('monthlyTasks') || 'null') || DEFAULT_TASKS;
+
+function renderCheckList() {
+  document.getElementById('checkList').innerHTML = tasks.map((t, i) => `
+    <div class="check-item ${checks[i] ? 'done' : ''}" id="ci${i}" onclick="toggleCheck(${i})">
+      <div class="check-box"></div>
+      <div class="check-label">${t.label}${t.sub ? `<div class="check-sub">${t.sub}</div>` : ''}</div>
+    </div>`).join('');
+  updateProgress();
+}
+
+function getWeekStart(offset = 0) {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+  const mon = new Date(now.setDate(diff + offset * 7));
+  mon.setHours(0,0,0,0);
+  return mon;
+}
+
+function formatWeekLabel(offset) {
+  const mon = getWeekStart(offset);
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
+  const tag = offset === 0 ? ' （今週）' : offset === -1 ? ' （先週）' : '';
+  return `${mon.getFullYear()}年 ${fmt(mon)}〜${fmt(sun)}${tag}`;
+}
+
+function getWeekKey(offset) { return getWeekStart(offset).toISOString().slice(0,10); }
+function updateWeekLabel() { document.getElementById('weekLabel').textContent = formatWeekLabel(currentWeekOffset); }
+
+function changeWeek(dir) {
+  currentWeekOffset += dir;
+  updateWeekLabel();
+  loadWeekData();
+}
+
+function toggleCheck(i) {
+  checks[i] = !checks[i];
+  document.getElementById('ci' + i).classList.toggle('done', checks[i]);
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = checks.filter(Boolean).length;
+  const total = tasks.length;
+  const pct = total > 0 ? (done / total * 100).toFixed(0) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${done} / ${total} 完了`;
+}
+
+function changeNum(key, delta) {
+  nums[key] = Math.max(0, nums[key] + delta);
+  document.getElementById('val-' + key).textContent = nums[key];
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['checkin','history','roadmap'][i] === tab);
+  });
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  if (tab === 'history') renderHistory();
+}
+
+function saveWeek() {
+  const key = getWeekKey(currentWeekOffset);
+  const record = {
+    key, label: formatWeekLabel(currentWeekOffset),
+    checks: [...checks], taskLabels: tasks.map(t => t.label),
+    nums: {...nums},
+    good: document.getElementById('txt-good').value,
+    next: document.getElementById('txt-next').value,
+    memo: document.getElementById('txt-memo').value,
+    savedAt: new Date().toISOString()
+  };
+  const idx = records.findIndex(r => r.key === key);
+  if (idx >= 0) records[idx] = record; else records.unshift(record);
+  localStorage.setItem('weeklyRecords', JSON.stringify(records));
+  showToast('保存しました 🫶🏻');
+}
+
+function loadWeekData() {
+  const rec = records.find(r => r.key === getWeekKey(currentWeekOffset));
+  checks = new Array(tasks.length).fill(false);
+  nums.hours = 0; nums.gta = 0; nums.fp = 0;
+  ['txt-good','txt-next','txt-memo'].forEach(id => document.getElementById(id).value = '');
+  if (rec) {
+    rec.checks.forEach((v, i) => { if (i < checks.length) checks[i] = v; });
+    nums.hours = rec.nums?.hours || 0;
+    nums.gta = rec.nums?.gta || 0;
+    nums.fp = rec.nums?.fp || 0;
+    document.getElementById('txt-good').value = rec.good || '';
+    document.getElementById('txt-next').value = rec.next || '';
+    document.getElementById('txt-memo').value = rec.memo || '';
+  }
+  ['hours','gta','fp'].forEach(k => document.getElementById('val-'+k).textContent = nums[k]);
+  renderCheckList();
+}
+
+function openTaskModal() {
+  document.getElementById('taskEditList').innerHTML = tasks.map((t, i) => `
+    <div class="task-edit-row" id="ter${i}">
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+        <input class="task-edit-input" type="text" value="${t.label}" placeholder="タスク名" id="ti${i}">
+        <input class="task-edit-sub" type="text" value="${t.sub||''}" placeholder="サブテキスト（任意）" id="ts${i}">
+      </div>
+      <button class="task-delete-btn" onclick="document.getElementById('ter${i}').remove()">✕</button>
+    </div>`).join('');
+  document.getElementById('taskModal').classList.add('show');
+}
+
+function closeTaskModal() { document.getElementById('taskModal').classList.remove('show'); }
+function closeModalOutside(e) { if (e.target === document.getElementById('taskModal')) closeTaskModal(); }
+
+function addTaskRow() {
+  const el = document.getElementById('taskEditList');
+  const i = Date.now();
+  const div = document.createElement('div');
+  div.className = 'task-edit-row';
+  div.id = `ter${i}`;
+  div.innerHTML = `
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+      <input class="task-edit-input" type="text" placeholder="タスク名">
+      <input class="task-edit-sub" type="text" placeholder="サブテキスト（任意）">
+    </div>
+    <button class="task-delete-btn" onclick="this.closest('.task-edit-row').remove()">✕</button>`;
+  el.appendChild(div);
+}
+
+function saveTasksFromModal() {
+  const newTasks = [];
+  document.querySelectorAll('#taskEditList .task-edit-row').forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const label = inputs[0]?.value?.trim();
+    const sub = inputs[1]?.value?.trim();
+    if (label) newTasks.push({ label, sub: sub || '' });
+  });
+  if (newTasks.length === 0) { showToast('タスクを1つ以上入れてね🐰'); return; }
+  tasks = newTasks;
+  checks = new Array(tasks.length).fill(false);
+  localStorage.setItem('monthlyTasks', JSON.stringify(tasks));
+  renderCheckList();
+  closeTaskModal();
+  showToast('タスクを更新したよ🌟');
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (records.length === 0) {
+    list.innerHTML = `<div class="empty"><span class="empty-icon">📖</span>まだ記録がないよ！<br>「今週」タブから最初の振り返りを書いてみて🐰</div>`;
+    return;
+  }
+  list.innerHTML = records.map(r => {
+    const done = r.checks ? r.checks.filter(Boolean).length : 0;
+    const total = r.taskLabels ? r.taskLabels.length : 5;
+    return `<div class="history-item">
+      <div class="history-week">${r.label}</div>
+      <div class="history-score">
+        <span class="score-chip">✅ ${done}/${total}完了</span>
+        <span class="score-chip">⏱ 副業${r.nums?.hours||0}h</span>
+        <span class="score-chip">📺 GTA${r.nums?.gta||0}話</span>
+        <span class="score-chip">📚 FP${r.nums?.fp||0}p</span>
+      </div>
+      ${r.good ? `<div class="history-text"><strong>✅ できたこと</strong>${r.good}</div>` : ''}
+      ${r.next ? `<div class="history-text"><strong>🌱 来週やること</strong>${r.next}</div>` : ''}
+      ${r.memo ? `<div class="history-text"><strong>💭 メモ</strong>${r.memo}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+updateWeekLabel();
+loadWeekData();
+</script>
+</body>
+</html>
